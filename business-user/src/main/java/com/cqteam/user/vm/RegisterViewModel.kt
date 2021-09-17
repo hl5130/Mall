@@ -2,13 +2,11 @@ package com.cqteam.user.vm
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cqteam.baselibrary.data.Result
-import com.cqteam.user.data.repository.DefaultUserRepository
+import com.cqteam.baselibrary.vm.BaseViewModel
 import com.cqteam.user.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,23 +20,25 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val userRepository: UserRepository
-): ViewModel() {
+): BaseViewModel() {
 
     private val _registerResult = MutableLiveData<String>()
     val registerResult: LiveData<String> = _registerResult
 
     fun register(mobile: String, pwd: String, verifyCode: String) {
         viewModelScope.launch {
+            showLoading.value = "loading"
             val result =userRepository.register(mobile, pwd, verifyCode)
             when(result) {
                 is Result.Success-> {
+                    hideLoading.value = "loading"
                     _registerResult.value = result.data!!
                 }
                 is Result.Error-> {
-                    _registerResult.value = result.exception.message
+                    hideLoading.value = "hide"
+                    error.value = result.exception.message
                 }
             }
         }
     }
-
 }
