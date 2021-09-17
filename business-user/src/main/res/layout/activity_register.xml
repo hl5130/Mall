@@ -8,11 +8,19 @@
     tools:context=".ui.activity.RegisterActivity"
     android:orientation="vertical">
 
+    <com.cqteam.baselibrary.widgets.HeaderBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:isShowBack="false"
+        app:titleText="注册"
+        app:rightText="登录"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <EditText
+            android:id="@+id/mPhoneEt"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -27,14 +35,17 @@
     </LinearLayout>
 
     <EditText
+        android:id="@+id/mVerifyCodeEt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="请输入验证码"/>
     <EditText
+        android:id="@+id/mPwdEt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="请输入密码"/>
     <EditText
+        android:id="@+id/mPwdSureEt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="请确认密码"/>

@@ -9,5 +9,5 @@ import com.cqteam.baselibrary.data.Result
  * Introduce：：
  **/
 interface UserDataSource {
-    suspend fun register(mobile: String, pwd: String, verifyCode: String): Result<String>
+    suspend fun register(mobile: String, pwd: String, verifyCode: String): Result<String>?
 }

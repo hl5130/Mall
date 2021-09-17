@@ -7,7 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.cqteam.baselibrary.data.Result
 import com.cqteam.user.data.repository.DefaultUserRepository
 import com.cqteam.user.data.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * Author：      小小亮
@@ -15,9 +18,11 @@ import kotlinx.coroutines.launch
  * Email：       281332545@qq.com
  * Introduce：：
  **/
-class RegisterViewModel: ViewModel() {
 
-    private val userRepository = DefaultUserRepository()
+@HiltViewModel
+class RegisterViewModel @Inject constructor(
+    private val userRepository: UserRepository
+): ViewModel() {
 
     private val _registerResult = MutableLiveData<String>()
     val registerResult: LiveData<String> = _registerResult
