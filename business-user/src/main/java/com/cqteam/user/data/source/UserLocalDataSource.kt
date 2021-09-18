@@ -18,4 +18,12 @@ class UserLocalDataSource: UserDataSource {
     override suspend fun login(mobile: String, pwd: String, pushId: String): Result<UserInfo>? {
         return null
     }
+
+    override suspend fun forgetPwd(mobile: String, verifyCode: String): Result<String>? {
+        return null
+    }
+
+    override suspend fun resetPwd(mobile: String, pwd: String): Result<String>? {
+        return null
+    }
 }

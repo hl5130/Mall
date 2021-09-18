@@ -5,9 +5,7 @@ import com.cqteam.baselibrary.data.Result
 import com.cqteam.baselibrary.data.net.RetrofitFactory
 import com.cqteam.baselibrary.exception.BusinessException
 import com.cqteam.user.data.api.UserApi
-import com.cqteam.user.data.protocol.LoginReq
-import com.cqteam.user.data.protocol.RegisterReq
-import com.cqteam.user.data.protocol.UserInfo
+import com.cqteam.user.data.protocol.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.lang.Exception
@@ -47,6 +45,36 @@ class UserRemoteDataSource: UserDataSource {
                     } else {
                         return@withContext Result.Error(BusinessException(resp.message))
                     }
+                }
+                return@withContext Result.Error(BusinessException(resp.message))
+            }catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext Result.Error(e)
+            }
+        }
+    }
+
+    override suspend fun forgetPwd(mobile: String, verifyCode: String): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val resp = service.forgetPwd(ForgetPwdReq(mobile, verifyCode))
+                if (resp.status == ResultCode.SUCCESS) {
+                    return@withContext Result.Success(resp.message?:"")
+                }
+                return@withContext Result.Error(BusinessException(resp.message))
+            }catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext Result.Error(e)
+            }
+        }
+    }
+
+    override suspend fun resetPwd(mobile: String, pwd: String): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val resp = service.resetPwd(ResetPwdReq(mobile, pwd))
+                if (resp.status == ResultCode.SUCCESS) {
+                    return@withContext Result.Success(resp.message?:"重置成功")
                 }
                 return@withContext Result.Error(BusinessException(resp.message))
             }catch (e: Exception) {

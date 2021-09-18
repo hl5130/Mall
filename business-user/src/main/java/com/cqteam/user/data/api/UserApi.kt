@@ -1,9 +1,7 @@
 package com.cqteam.user.data.api
 
 import com.cqteam.baselibrary.data.protocol.BaseResp
-import com.cqteam.user.data.protocol.LoginReq
-import com.cqteam.user.data.protocol.RegisterReq
-import com.cqteam.user.data.protocol.UserInfo
+import com.cqteam.user.data.protocol.*
 import retrofit2.http.Body
 import retrofit2.http.POST
 
@@ -20,5 +18,11 @@ interface UserApi {
 
     @POST("userCenter/login")
     suspend fun login(@Body req: LoginReq): BaseResp<UserInfo>
+
+    @POST("userCenter/forgetPwd")
+    suspend fun forgetPwd(@Body req: ForgetPwdReq): BaseResp<String>
+
+    @POST("userCenter/resetPwd")
+    suspend fun resetPwd(@Body req: ResetPwdReq): BaseResp<String>
 
 }

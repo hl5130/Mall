@@ -12,4 +12,6 @@ import com.cqteam.user.data.protocol.UserInfo
 interface UserDataSource {
     suspend fun register(mobile: String, pwd: String, verifyCode: String): Result<String>?
     suspend fun login(mobile: String, pwd: String, pushId: String): Result<UserInfo>?
+    suspend fun forgetPwd(mobile: String, verifyCode: String): Result<String>?
+    suspend fun resetPwd(mobile: String, pwd: String): Result<String>?
 }

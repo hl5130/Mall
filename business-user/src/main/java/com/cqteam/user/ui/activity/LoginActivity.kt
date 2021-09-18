@@ -72,7 +72,7 @@ class LoginActivity : BaseActivity<LoginViewModel>(), View.OnClickListener {
                 login()
             }
             R.id.mForgetPwdTv -> {
-
+                startActivity(Intent(this,ForgetPwdActivity::class.java))
             }
             R.id.mRightTv -> {
                 startActivity(Intent(this,RegisterActivity::class.java))
