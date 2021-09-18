@@ -8,6 +8,6 @@ package com.cqteam.baselibrary.data.protocol
  **/
 class BaseResp<out T>(
     val status: Int,
-    val message: String,
-    val data: T
+    val message: String?,
+    val data: T?
 )

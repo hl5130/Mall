@@ -4,11 +4,13 @@ buildscript {
     ext.retrofit_version = "2.9.0"
     ext.okhttp_version = "4.9.0"
     ext.hilt_version = "2.38.1"
+    ext.glide_version = "4.11.0"
 
 
     repositories {
         google()
         jcenter()
+        maven { url 'https://maven.google.com' }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.1.2"
@@ -23,6 +25,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://maven.google.com' }
     }
 }
 

@@ -1,5 +1,6 @@
 package com.cqteam.user.data.source
 
+import com.cqteam.baselibrary.common.ResultCode
 import com.cqteam.baselibrary.data.Result
 import com.cqteam.baselibrary.data.net.RetrofitFactory
 import com.cqteam.user.data.api.UserApi
@@ -19,10 +20,10 @@ class UserRemoteDataSource: UserDataSource {
         return withContext(Dispatchers.IO) {
             try {
                 val resp = RetrofitFactory.instance.create(UserApi::class.java).register(RegisterReq(mobile, pwd, verifyCode))
-                if (resp.status != 0) {
-                    return@withContext Result.Error(Exception(resp.message))
+                if (resp.status == ResultCode.SUCCESS) {
+                    return@withContext Result.Success(resp.message?:"注册成功")
                 }
-                return@withContext Result.Success(resp.data)
+                return@withContext Result.Error(Exception(resp.message))
             }catch (e: Exception) {
                 e.printStackTrace()
                 return@withContext Result.Error(e)
