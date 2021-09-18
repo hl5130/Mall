@@ -1,5 +1,6 @@
 package com.cqteam.baselibrary.widgets
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -24,9 +25,9 @@ class HeaderBar @JvmOverloads constructor(
     private var titleText: String? = null
     private var rightText: String? = null
 
-    private lateinit var mLeftIv: ImageView
-    private lateinit var mTitleTv: TextView
-    private lateinit var mRightTv: TextView
+    lateinit var mLeftIv: ImageView
+    lateinit var mTitleTv: TextView
+    lateinit var mRightTv: TextView
 
     init {
         val typedArray = context.obtainStyledAttributes(attrs,R.styleable.HeaderBar)
@@ -48,6 +49,10 @@ class HeaderBar @JvmOverloads constructor(
         rightText?.let {
             mRightTv.visibility = View.VISIBLE
             mRightTv.text = it
+        }
+
+        mLeftIv.setOnClickListener {
+            if (context is Activity) (context as Activity).finish()
         }
     }
 }

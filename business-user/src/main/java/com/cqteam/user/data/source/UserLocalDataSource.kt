@@ -1,6 +1,7 @@
 package com.cqteam.user.data.source
 
 import com.cqteam.baselibrary.data.Result
+import com.cqteam.user.data.protocol.UserInfo
 
 /**
  * Author： 洪亮
@@ -11,6 +12,10 @@ import com.cqteam.baselibrary.data.Result
  */
 class UserLocalDataSource: UserDataSource {
     override suspend fun register(mobile: String, pwd: String, verifyCode: String): Result<String>? {
+        return null
+    }
+
+    override suspend fun login(mobile: String, pwd: String, pushId: String): Result<UserInfo>? {
         return null
     }
 }

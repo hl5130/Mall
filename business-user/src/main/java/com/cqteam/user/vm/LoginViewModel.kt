@@ -1,15 +1,12 @@
 package com.cqteam.user.vm
 
-import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.cqteam.baselibrary.data.Result
 import com.cqteam.baselibrary.vm.BaseViewModel
+import com.cqteam.user.data.protocol.UserInfo
 import com.cqteam.user.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import okhttp3.internal.cache2.Relay.Companion.edit
 import javax.inject.Inject
 
 /**
@@ -20,21 +17,21 @@ import javax.inject.Inject
  **/
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor(
+class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository
 ): BaseViewModel() {
 
-    private val _registerResult = MutableLiveData<String>()
-    val registerResult: LiveData<String> = _registerResult
+    private val _loginResult = MutableLiveData<UserInfo>()
+    val loginResult: LiveData<UserInfo> = _loginResult
 
-    fun register(mobile: String, pwd: String, verifyCode: String) {
+    fun login(mobile: String, pwd: String, pushId: String) {
         launchUI {
             showLoading.value = "loading"
-            val result =userRepository.register(mobile, pwd, verifyCode)
+            val result = userRepository.login(mobile, pwd, pushId)
             when(result) {
                 is Result.Success-> {
                     hideLoading.value = "loading"
-                    _registerResult.value = result.data!!
+                    _loginResult.value = result.data!!
                 }
                 is Result.Error-> {
                     hideLoading.value = "hide"

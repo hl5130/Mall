@@ -62,15 +62,15 @@ class RegisterActivity : BaseActivity<RegisterViewModel>(), View.OnClickListener
         }
     }
 
-    override fun onBackPressed() {
-        val time = System.currentTimeMillis()
-        if (time - pressTime > 2000) {
-            ToastUtils.show("再按一次退出程序")
-            pressTime = time
-        } else {
-            AppManager.instance.exitApp(this)
-        }
-    }
+//    override fun onBackPressed() {
+//        val time = System.currentTimeMillis()
+//        if (time - pressTime > 2000) {
+//            ToastUtils.show("再按一次退出程序")
+//            pressTime = time
+//        } else {
+//            AppManager.instance.exitApp(this)
+//        }
+//    }
 
     override fun onClick(v: View) {
         when(v.id) {

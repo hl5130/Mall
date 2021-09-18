@@ -1,6 +1,7 @@
 package com.cqteam.user.data.repository
 
 import com.cqteam.baselibrary.data.Result
+import com.cqteam.user.data.protocol.UserInfo
 
 /**
  * Author：      小小亮
@@ -10,4 +11,5 @@ import com.cqteam.baselibrary.data.Result
  **/
 interface UserRepository {
     suspend fun register(mobile: String, pwd: String, verifyCode: String): Result<String>
+    suspend fun login(mobile: String, pwd: String, pushId: String): Result<UserInfo>
 }
