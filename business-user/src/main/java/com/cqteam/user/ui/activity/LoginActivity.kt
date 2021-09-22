@@ -45,6 +45,7 @@ class LoginActivity : BaseActivity<LoginViewModel>(), View.OnClickListener {
         // 注册结果
         viewModel.loginResult.observe(this, {
             ToastUtils.show("登录成功")
+            startActivity(Intent(this,UserInfoActivity::class.java))
         })
     }
 

@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.content.ContextCompat
 import com.cqteam.baselibrary.R
 
 /*
@@ -38,7 +39,7 @@ class VerifyButton(mContext: Context, attrs: AttributeSet) : AppCompatButton(mCo
     private val countDown = object : Runnable {
         override fun run() {
             this@VerifyButton.text = mCount.toString() + "s "
-            this@VerifyButton.setBackgroundColor(resources.getColor(R.color.common_disable))
+            this@VerifyButton.setBackgroundColor(ContextCompat.getColor(context,R.color.common_disable))
             this@VerifyButton.setTextColor(resources.getColor(R.color.common_white))
             this@VerifyButton.isEnabled = false
 
