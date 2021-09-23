@@ -83,4 +83,24 @@ class UserRemoteDataSource: UserDataSource {
             }
         }
     }
+
+    override suspend fun editUser(
+        userIcon: String,
+        userName: String,
+        gender: String,
+        sign: String
+    ): Result<UserInfo> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val resp = service.editUser(EditUserReq(userIcon, userName, gender, sign))
+                if (resp.status == ResultCode.SUCCESS) {
+                    return@withContext Result.Success(resp.data!!)
+                }
+                return@withContext Result.Error(BusinessException(resp.message))
+            }catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext Result.Error(e)
+            }
+        }
+    }
 }

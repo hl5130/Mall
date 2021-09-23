@@ -6,6 +6,7 @@ import com.cqteam.baselibrary.data.Result
 import com.cqteam.baselibrary.vm.BaseViewModel
 import com.cqteam.user.data.protocol.UserInfo
 import com.cqteam.user.data.repository.UserRepository
+import com.cqteam.user.utils.UserPrefsUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -31,6 +32,7 @@ class LoginViewModel @Inject constructor(
             when(result) {
                 is Result.Success-> {
                     hideLoading.value = "loading"
+                    UserPrefsUtils.putUserInfo(result.data!!)
                     _loginResult.value = result.data!!
                 }
                 is Result.Error-> {

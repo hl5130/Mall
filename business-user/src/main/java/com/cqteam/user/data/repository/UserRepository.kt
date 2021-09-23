@@ -14,4 +14,5 @@ interface UserRepository {
     suspend fun login(mobile: String, pwd: String, pushId: String): Result<UserInfo>
     suspend fun forgetPwd(mobile: String, verifyCode: String): Result<String>
     suspend fun resetPwd(mobile: String, pwd: String): Result<String>
+    suspend fun editUser(userIcon: String, userName: String, gender: String, sign: String): Result<UserInfo>
 }

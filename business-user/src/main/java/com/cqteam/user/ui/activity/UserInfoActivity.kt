@@ -1,11 +1,9 @@
 package com.cqteam.user.ui.activity
 
 import android.Manifest
-import android.R.attr
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -18,34 +16,26 @@ import androidx.lifecycle.lifecycleScope
 import com.bigkoo.alertview.AlertView
 import com.bigkoo.alertview.OnItemClickListener
 import com.cqteam.baselibrary.common.BaseConstant
-import com.cqteam.baselibrary.glide.CustomCompressEngine
 import com.cqteam.baselibrary.glide.GlideEngine
 import com.cqteam.baselibrary.ui.activity.BaseActivity
+import com.cqteam.baselibrary.utils.AppPrefsUtils
 import com.cqteam.baselibrary.utils.GlideUtils
 import com.cqteam.baselibrary.utils.QiNiuUtils
 import com.cqteam.baselibrary.widgets.ToastUtils
-import com.cqteam.user.BuildConfig
+import com.cqteam.provider.common.ProviderConstant
 import com.cqteam.user.R
 import com.cqteam.user.databinding.ActivityUserInfoBinding
 import com.cqteam.user.vm.UserInfoViewModel
 import com.kotlin.base.utils.DateUtils
 import com.luck.picture.lib.PictureSelector
-import com.luck.picture.lib.compress.CompressionPredicate
-import com.luck.picture.lib.compress.Luban
-import com.luck.picture.lib.compress.OnCompressListener
 import com.luck.picture.lib.config.PictureConfig
 import com.luck.picture.lib.config.PictureMimeType
 import com.luck.picture.lib.entity.LocalMedia
-import com.qiniu.android.http.ResponseInfo
-import com.qiniu.android.storage.UpCompletionHandler
 import com.qiniu.android.storage.UploadManager
 import dagger.hilt.android.AndroidEntryPoint
 import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.default
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import permissions.dispatcher.*
 import java.io.File
 import java.util.*
@@ -62,8 +52,14 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
 
     private val logTag = "takePhoto"
     private val uploadManager: UploadManager by lazy { UploadManager() }
-    private var mHeaderImageUrl: String = ""
-    private var mHeaderImageUrlCompress: String = ""
+    private var mLocalHeaderImageUrl: String = "" // 本地路径，原始图片路径
+    private var mLocalHeaderImageUrlCompress: String = "" // 本地路径，压缩图片路径
+    private var mRemoteHeaderImageUrl: String = "" // 远程服务器路径
+    private var mUserIcon: String? ="" // 用户头像
+    private var mUserName: String? = "" // 用户名
+    private var mUserGender: String? = "" // 用户性别
+    private var mUserSign: String? = "" // 用户签名
+    private var mUserMobile: String? = "" // 用户手机
 
     private lateinit var binding: ActivityUserInfoBinding
     private lateinit var mTempFile: File
@@ -78,13 +74,35 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
 
     private fun initData() {
 
+        mUserIcon = AppPrefsUtils.getString(ProviderConstant.KEY_SP_USER_ICON)
+        mUserName = AppPrefsUtils.getString(ProviderConstant.KEY_SP_USER_NAME)
+        mUserGender = AppPrefsUtils.getString(ProviderConstant.KEY_SP_USER_GENDER)
+        mUserSign = AppPrefsUtils.getString(ProviderConstant.KEY_SP_USER_SIGN)
+        mUserMobile = AppPrefsUtils.getString(ProviderConstant.KEY_SP_USER_MOBILE)
+
+        if (!mUserIcon.isNullOrEmpty()) {
+            mRemoteHeaderImageUrl = mUserIcon!!
+            GlideUtils.loadUrlImage(this,mUserIcon!!,binding.mUserIconIv)
+        }
+        binding.mUserNameEt.setText(mUserName)
+        binding.mUserSignEt.setText(mUserSign)
+        binding.mUserMobileTv.text = mUserMobile
+        if (mUserGender == "0") binding.mGenderMaleRb.isChecked = true
+        else  binding.mGenderFemaleRb.isChecked = true
+
         // 获取凭证之后的提交
         viewModel.uploadTokenResult.observe(this, {
             uploadImage(it)
         })
+
+        // 提交用户信息
+        viewModel.editUserInfoResult.observe(this, {
+            ToastUtils.show("保存成功")
+        })
     }
 
     private fun initView() {
+        // 头像
         binding.mUserIconIv.setOnClickListener {
             AlertView("选择图片", null, "取消", null,
                 arrayOf("拍照", "相册"), this, AlertView.Style.ActionSheet,
@@ -95,6 +113,15 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
                         1 -> openGalleryWithPermissionCheck()
                     }
                 }).show()
+        }
+
+        // 保存按钮
+        binding.mHeaderBar.mRightTv.setOnClickListener {
+            viewModel.editUser(
+                mRemoteHeaderImageUrl,
+                binding.mUserNameEt.text.toString(),
+                if (binding.mGenderMaleRb.isChecked) "0" else "1",
+                binding.mUserSignEt.text.toString())
         }
     }
 
@@ -236,7 +263,7 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
             Log.d(logTag, "大于等于 Android Q realPath:$realPath")
         }
         if (!realPath.isNullOrEmpty()) {
-            mHeaderImageUrl = realPath
+            mLocalHeaderImageUrl = realPath
             compressImage() // 启动压缩操作
         } else {
             ToastUtils.show("暂时无法修改头像")
@@ -250,7 +277,7 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
         viewModel.showLoading.value = "loading"
         lifecycleScope.launch {
             Log.d(logTag, "lifecycleScope.launch==${Thread.currentThread().name}")
-            val compressedImageFile = Compressor.compress(this@UserInfoActivity, File(mHeaderImageUrl)) {
+            val compressedImageFile = Compressor.compress(this@UserInfoActivity, File(mLocalHeaderImageUrl)) {
                 Log.d(logTag, "Compressor.compress==${Thread.currentThread().name}")
                 // 使用 Bitmap.CompressFormat.WEBP_LOSSY 和  Bitmap.CompressFormat.WEBP_LOSSLESS，应用会崩溃
                 default(width = 120, format = Bitmap.CompressFormat.WEBP)
@@ -260,8 +287,8 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
                 Log.e(logTag,"图片压缩失败")
                 ToastUtils.show("暂时无法修改头像")
             } else {
-                mHeaderImageUrlCompress = compressedImageFile.absolutePath
-                Log.d(logTag,"压缩后图片的路径：$mHeaderImageUrlCompress")
+                mLocalHeaderImageUrlCompress = compressedImageFile.absolutePath
+                Log.d(logTag,"压缩后图片的路径：$mLocalHeaderImageUrlCompress")
                 viewModel.getUploadToken()
             }
         }
@@ -273,17 +300,16 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
      */
     private fun uploadImage(uploadToken: String) {
         viewModel.showLoading.value = "loading"
-        uploadManager.put(mHeaderImageUrlCompress,null,uploadToken,
+        uploadManager.put(mLocalHeaderImageUrlCompress,null,uploadToken,
             { key, info, response ->
                 viewModel.hideLoading.value = "hide"
                 if (info.isOK) {
                     ToastUtils.show("上传成功")
                     Log.d(logTag, "上传成功")
                     Log.d(logTag, response.toString())
-                    setHeaderImage(
-//                        QiNiuUtils.instance.downloadUrl(BaseConstant.QINIU_ADDRESS + response?.get("hash"))
-                        BaseConstant.QINIU_ADDRESS + response?.get("hash")
-                    )
+                    mRemoteHeaderImageUrl = BaseConstant.QINIU_ADDRESS + response?.get("hash")
+//                    mRemoteHeaderImageUrl = QiNiuUtils.instance.downloadUrl(BaseConstant.QINIU_ADDRESS + response?.get("hash"))
+                    setHeaderImage(mRemoteHeaderImageUrl)
                 } else {
                     ToastUtils.show("上传失败")
                     Log.e(logTag, info.error)

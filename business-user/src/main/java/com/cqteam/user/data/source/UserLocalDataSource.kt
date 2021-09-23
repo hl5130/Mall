@@ -26,4 +26,13 @@ class UserLocalDataSource: UserDataSource {
     override suspend fun resetPwd(mobile: String, pwd: String): Result<String>? {
         return null
     }
+
+    override suspend fun editUser(
+        userIcon: String,
+        userName: String,
+        gender: String,
+        sign: String
+    ): Result<UserInfo>? {
+        return null
+    }
 }

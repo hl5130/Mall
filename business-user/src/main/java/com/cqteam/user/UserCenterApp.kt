@@ -1,6 +1,7 @@
 package com.cqteam.user
 
 import android.app.Application
+import com.cqteam.baselibrary.utils.AppPrefsUtils
 import com.cqteam.baselibrary.widgets.ToastUtils
 import dagger.hilt.android.HiltAndroidApp
 
@@ -17,6 +18,7 @@ class UserCenterApp: Application() {
     override fun onCreate() {
         super.onCreate()
         ToastUtils.init(this)
+        AppPrefsUtils.create(this)
     }
 
 }

@@ -3,6 +3,7 @@
               xmlns:app="http://schemas.android.com/apk/res-auto"
               style="@style/MatchMatch.Vertical.Common">
     <com.cqteam.baselibrary.widgets.HeaderBar
+        android:id="@+id/mHeaderBar"
                                        app:titleText="个人信息"
                                        app:rightText="@string/common_save"
                                        style="@style/MatchWrap"/>

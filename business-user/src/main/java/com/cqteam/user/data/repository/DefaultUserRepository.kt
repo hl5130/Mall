@@ -30,4 +30,13 @@ class DefaultUserRepository(
     override suspend fun resetPwd(mobile: String, pwd: String): Result<String> {
         return userRemoteDataSource.resetPwd(mobile, pwd)!!
     }
+
+    override suspend fun editUser(
+        userIcon: String,
+        userName: String,
+        gender: String,
+        sign: String
+    ): Result<UserInfo> {
+        return userRemoteDataSource.editUser(userIcon, userName, gender, sign)!!
+    }
 }

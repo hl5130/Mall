@@ -12,3 +12,7 @@
 
 七牛上传图片成
 {"hash":"Fita6jAkfN9Ok4YVAaY8Q5uh4jG5","key":"Fita6jAkfN9Ok4YVAaY8Q5uh4jG5"}
+
+
+修改用户信息
+{"status":0,"data":{"id":10,"userName":"","userMobile":"13896040018","userIcon":"","userGender":"0","userSign":"","pushId":""}}
