@@ -79,12 +79,20 @@ dependencies {
     kapt "com.github.bumptech.glide:compiler:$glide_version"
     //Circle ImageView
     api "de.hdodenhof:circleimageview:${circle_imageView_version}"
-    //Take Photo
-    api "com.jph.takephoto:takephoto_library:${take_photo_version}"
     //Alert View
     api "com.bigkoo:alertview:${alert_view_version}"
+    // PicturesSelector
+    api "io.github.lucksiege:pictureselector:$pictures_selector_version"
 
-    // permissiondispatcher
+    // 权限拦截器
     api "com.github.permissions-dispatcher:permissionsdispatcher:${permission_dispatcher_version}"
     kapt "com.github.permissions-dispatcher:permissionsdispatcher-processor:${permission_dispatcher_version}"
+
+    // 七牛云
+    api ("com.qiniu:qiniu-android-sdk:$qiniu_version"){
+        exclude (group: 'com.squareup.okhttp3', module: 'okhttp')
+    }
+
+    // 图片压缩框架
+    api 'id.zelory:compressor:3.0.1'
 }

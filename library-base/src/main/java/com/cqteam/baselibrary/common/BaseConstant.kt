@@ -10,5 +10,6 @@ class BaseConstant {
     companion object {
         const val SERVICE_ADDRESS = "http://192.168.99.111:8080/Kotlin_war_exploded/"
         const val TABLE_PREFS = "Kotlin_mall"
+        const val QINIU_ADDRESS = "http://qzvb9uiq8.hn-bkt.clouddn.com/"
     }
 }

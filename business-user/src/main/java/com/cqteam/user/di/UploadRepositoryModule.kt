@@ -1,6 +1,8 @@
 package com.cqteam.user.di
 
+import com.cqteam.user.data.repository.DefaultUploadRepository
 import com.cqteam.user.data.repository.DefaultUserRepository
+import com.cqteam.user.data.repository.UploadRepository
 import com.cqteam.user.data.repository.UserRepository
 import com.cqteam.user.data.source.UserDataSource
 import dagger.Module
@@ -14,18 +16,16 @@ import javax.inject.Singleton
  * Time： 2021/9/17 - 5:35 PM
  * Email：281332545@qq.com
  * <p>
- * 描述： UserRepository 容器
+ * 描述： UploadRepository 容器
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object UserRepositoryModule {
+object UploadRepositoryModule {
 
     @Singleton
     @Provides
-    fun provideUserRepository(
-        @UserModule.LocalUserDataSource userLocalDataSource: UserDataSource,
-        @UserModule.RemoteUserDataSource userRemoteDataSource: UserDataSource
-    ): UserRepository {
-        return DefaultUserRepository(userLocalDataSource, userRemoteDataSource)
+    fun provideUploadRepository(
+    ): UploadRepository {
+        return DefaultUploadRepository()
     }
 }

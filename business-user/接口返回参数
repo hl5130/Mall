@@ -6,3 +6,9 @@
 
 重置密码：
 {"status":0,"message":"密码修改成功"}
+
+获取七牛的上传凭证
+{"status":0,"message":"","data":"OxJIx89R1pgyP7rkmc6U3mHxsXrPiRXxfpu5JP8j:Tk95i8Q9YJ426M6AIOusAzk8jR8\u003d:eyJzY29wZSI6ImtvdGxpbiIsImRlYWRsaW5lIjoxNjMyMzg1MDI4fQ\u003d\u003d"}
+
+七牛上传图片成
+{"hash":"Fita6jAkfN9Ok4YVAaY8Q5uh4jG5","key":"Fita6jAkfN9Ok4YVAaY8Q5uh4jG5"}

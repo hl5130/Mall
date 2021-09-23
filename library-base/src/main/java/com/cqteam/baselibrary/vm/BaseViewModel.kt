@@ -1,5 +1,6 @@
 package com.cqteam.baselibrary.vm
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,6 +26,7 @@ abstract class BaseViewModel: ViewModel() {
 
     fun launchUI(block: suspend CoroutineScope.() -> Unit) {
         viewModelScope.launch {
+            Log.d("BaseViewModel", "viewModelScope.launch==${Thread.currentThread().name}")
             block()
         }
     }

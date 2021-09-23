@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.cqteam.baselibrary.data.Result
 import com.cqteam.baselibrary.vm.BaseViewModel
+import com.cqteam.user.data.repository.DefaultUploadRepository
+import com.cqteam.user.data.repository.UploadRepository
 import com.cqteam.user.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -17,24 +19,24 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserInfoViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val uploadRepository: UploadRepository
 ): BaseViewModel() {
 
-    private val _resentPwdResult = MutableLiveData<String>()
-    val resentPwdResult: LiveData<String> = _resentPwdResult
+    private val _uploadTokenResult = MutableLiveData<String>()
+    val uploadTokenResult: LiveData<String> = _uploadTokenResult
 
-    fun resetPwd(mobile: String, pwd: String) {
+    fun getUploadToken() {
         launchUI {
             showLoading.value = "loading"
-            val result =userRepository.resetPwd(mobile, pwd)
-            when(result) {
-                is Result.Success-> {
-                    hideLoading.value = "loading"
-                    _resentPwdResult.value = result.data!!
-                }
-                is Result.Error-> {
+            val result = uploadRepository.getUploadToken()
+            when (result) {
+                is Result.Success -> {
                     hideLoading.value = "hide"
-                    error.value = result.exception.message
+                    _uploadTokenResult.value = result.data!!
+                }
+                is Result.Error -> {
+                    hideLoading.value = "hide"
                 }
             }
         }

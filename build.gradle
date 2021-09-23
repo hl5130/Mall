@@ -6,9 +6,10 @@ buildscript {
     ext.hilt_version = "2.38.1"
     ext.glide_version = "4.12.0"
     ext.circle_imageView_version = "2.1.0"  // 圆形图片
-    ext.take_photo_version = "4.0.3" // 图片选择器
+    ext.pictures_selector_version = "v2.7.3-rc08" // 图片选择器
     ext.alert_view_version = "1.0.3" // 弹框
     ext.permission_dispatcher_version = "4.9.1" //权限拦截器
+    ext.qiniu_version = "8.3.+" // 七牛云
 
 
     repositories {

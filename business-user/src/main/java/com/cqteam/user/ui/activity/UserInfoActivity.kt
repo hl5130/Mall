@@ -1,55 +1,87 @@
 package com.cqteam.user.ui.activity
 
 import android.Manifest
+import android.R.attr
 import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.bigkoo.alertview.AlertView
 import com.bigkoo.alertview.OnItemClickListener
+import com.cqteam.baselibrary.common.BaseConstant
+import com.cqteam.baselibrary.glide.CustomCompressEngine
+import com.cqteam.baselibrary.glide.GlideEngine
 import com.cqteam.baselibrary.ui.activity.BaseActivity
+import com.cqteam.baselibrary.utils.GlideUtils
+import com.cqteam.baselibrary.utils.QiNiuUtils
 import com.cqteam.baselibrary.widgets.ToastUtils
+import com.cqteam.user.BuildConfig
 import com.cqteam.user.R
 import com.cqteam.user.databinding.ActivityUserInfoBinding
 import com.cqteam.user.vm.UserInfoViewModel
-import com.jph.takephoto.app.TakePhoto
-import com.jph.takephoto.app.TakePhotoImpl
-import com.jph.takephoto.compress.CompressConfig
-import com.jph.takephoto.model.TResult
 import com.kotlin.base.utils.DateUtils
+import com.luck.picture.lib.PictureSelector
+import com.luck.picture.lib.compress.CompressionPredicate
+import com.luck.picture.lib.compress.Luban
+import com.luck.picture.lib.compress.OnCompressListener
+import com.luck.picture.lib.config.PictureConfig
+import com.luck.picture.lib.config.PictureMimeType
+import com.luck.picture.lib.entity.LocalMedia
+import com.qiniu.android.http.ResponseInfo
+import com.qiniu.android.storage.UpCompletionHandler
+import com.qiniu.android.storage.UploadManager
 import dagger.hilt.android.AndroidEntryPoint
+import id.zelory.compressor.Compressor
+import id.zelory.compressor.constraint.default
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 import permissions.dispatcher.*
 import java.io.File
+import java.util.*
+
 
 /**
  *  用户信息页面
  */
 @RuntimePermissions
 @AndroidEntryPoint
-class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener,TakePhoto.TakeResultListener {
+class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener {
 
     override val viewModel: UserInfoViewModel by viewModels()
 
+    private val logTag = "takePhoto"
+    private val uploadManager: UploadManager by lazy { UploadManager() }
+    private var mHeaderImageUrl: String = ""
+    private var mHeaderImageUrlCompress: String = ""
+
     private lateinit var binding: ActivityUserInfoBinding
-    private lateinit var mTakePhoto: TakePhoto
     private lateinit var mTempFile: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserInfoBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        mTakePhoto = TakePhotoImpl(this, this)
-        mTakePhoto.onCreate(savedInstanceState)
         initView()
         initData()
     }
 
     private fun initData() {
+
+        // 获取凭证之后的提交
+        viewModel.uploadTokenResult.observe(this, {
+            uploadImage(it)
+        })
     }
 
     private fun initView() {
@@ -58,7 +90,6 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
                 arrayOf("拍照", "相册"), this, AlertView.Style.ActionSheet,
                 OnItemClickListener { _, position ->
                     // 开启压缩
-                    mTakePhoto.onEnableCompress(CompressConfig.ofDefaultConfig(), false)
                     when (position) {
                         0 -> openCameraWithPermissionCheck()
                         1 -> openGalleryWithPermissionCheck()
@@ -74,33 +105,16 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
         }
     }
 
-    // 选择图片结果
-    override fun takeSuccess(result: TResult?) {
-        Log.d("takePhoto", result?.image?.originalPath ?: "没有找到原始文件地址")
-        Log.d("takePhoto", result?.image?.compressPath ?: "没有找到压缩文件地址")
-    }
-
-    override fun takeFail(result: TResult?, msg: String?) {
-        Log.e("takePhoto", msg ?: "出现错了")
-    }
-
-    override fun takeCancel() {
-        Log.e("takePhoto", "取消了")
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        mTakePhoto.onActivityResult(requestCode, resultCode, data)
-        super.onActivityResult(requestCode, resultCode, data)
-    }
-
     /**
      *  打开摄像头
      */
-    @NeedsPermission(Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    @NeedsPermission(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun openCamera() {
-        createTempFile()
-        mTakePhoto.onPickFromCapture(Uri.fromFile(mTempFile))
-        ToastUtils.show("打开相机")
+        Log.d(logTag, "打开相机")
+        PictureSelector.create(this)
+            .openCamera(PictureMimeType.ofImage())
+            .imageEngine(GlideEngine.createGlideEngine())
+            .forResult(PictureConfig.REQUEST_CAMERA)
     }
 
     /**
@@ -108,22 +122,26 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
      */
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun openGallery() {
-        mTakePhoto.onPickFromGallery()
-        ToastUtils.show("打开图库")
+        Log.d(logTag, "打开图库")
+        PictureSelector.create(this)
+            .openGallery(PictureMimeType.ofImage())
+            .imageEngine(GlideEngine.createGlideEngine())
+            .selectionMode(PictureConfig.SINGLE) // 单选
+            .forResult(PictureConfig.CHOOSE_REQUEST)
     }
 
     // 相机权限
-    @OnShowRationale(Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    @OnShowRationale(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun showRationaleForCamera(request: PermissionRequest) {
         showRationaleDialog("需要打开相机和存储权限", request)
     }
 
-    @OnPermissionDenied(Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    @OnPermissionDenied(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun onCameraDenied() {
         Toast.makeText(this, "相机和存储被禁用了", Toast.LENGTH_SHORT).show()
     }
 
-    @OnNeverAskAgain(Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    @OnNeverAskAgain(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
     fun onCameraNeverAskAgain() {
         Toast.makeText(this, "不再继续询问", Toast.LENGTH_SHORT).show()
     }
@@ -161,12 +179,12 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
         val tempFileName = "${DateUtils.curTime}.png"
         // 检查SD卡是否装载，若装载有，就存储到SD卡中；如果没有就放在手机存储中
         if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()){
-            Log.d("takePhoto","SD卡装载成功，图片写入SD卡中")
-            mTempFile = File(Environment.getStorageDirectory(),tempFileName)
+            Log.d("takePhoto", "SD卡装载成功，图片写入SD卡中")
+            mTempFile = File(Environment.getStorageDirectory(), tempFileName)
             return
         }
-        mTempFile = File(filesDir,tempFileName)
-        Log.d("takePhoto","SD卡未装载，图片写入手机存储器中")
+        mTempFile = File(filesDir, tempFileName)
+        Log.d(logTag, "SD卡未装载，图片写入手机存储器中")
     }
 
     override fun onRequestPermissionsResult(
@@ -176,5 +194,110 @@ class UserInfoActivity : BaseActivity<UserInfoViewModel>(), View.OnClickListener
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         onRequestPermissionsResult(requestCode, grantResults)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == RESULT_OK) {
+            when(requestCode) {
+                PictureConfig.REQUEST_CAMERA -> { // 单独拍照
+                    val result: List<LocalMedia> = PictureSelector.obtainMultipleResult(data)
+                    Log.d(logTag, "单独拍照回调")
+                    if (result.isNullOrEmpty()) {
+                        ToastUtils.show("请重新拍照")
+                        return
+                    }
+                    operationImageUrl(result)
+                }
+
+                PictureConfig.CHOOSE_REQUEST -> { // 选择图片
+                    val result: List<LocalMedia> = PictureSelector.obtainMultipleResult(data)
+                    Log.d(logTag, "选择图片回调")
+                    if (result.isNullOrEmpty()) {
+                        ToastUtils.show("请重新选择图片")
+                        return
+                    }
+                    operationImageUrl(result)
+                }
+            }
+        }
+    }
+
+    /**
+     *  处理图片路径
+     */
+    private fun operationImageUrl(result: List<LocalMedia>) {
+        val realPath: String?
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+            realPath = result[0].realPath
+            Log.d(logTag, "小于 Android Q realPath:$realPath")
+        } else {
+            realPath = result[0].androidQToPath
+            Log.d(logTag, "大于等于 Android Q realPath:$realPath")
+        }
+        if (!realPath.isNullOrEmpty()) {
+            mHeaderImageUrl = realPath
+            compressImage() // 启动压缩操作
+        } else {
+            ToastUtils.show("暂时无法修改头像")
+        }
+    }
+
+    /**
+     *  压缩图片
+     */
+    private fun compressImage() {
+        viewModel.showLoading.value = "loading"
+        lifecycleScope.launch {
+            Log.d(logTag, "lifecycleScope.launch==${Thread.currentThread().name}")
+            val compressedImageFile = Compressor.compress(this@UserInfoActivity, File(mHeaderImageUrl)) {
+                Log.d(logTag, "Compressor.compress==${Thread.currentThread().name}")
+                // 使用 Bitmap.CompressFormat.WEBP_LOSSY 和  Bitmap.CompressFormat.WEBP_LOSSLESS，应用会崩溃
+                default(width = 120, format = Bitmap.CompressFormat.WEBP)
+            }
+            if (compressedImageFile.absolutePath.isNullOrEmpty()) {
+                viewModel.hideLoading.value = "loading"
+                Log.e(logTag,"图片压缩失败")
+                ToastUtils.show("暂时无法修改头像")
+            } else {
+                mHeaderImageUrlCompress = compressedImageFile.absolutePath
+                Log.d(logTag,"压缩后图片的路径：$mHeaderImageUrlCompress")
+                viewModel.getUploadToken()
+            }
+        }
+    }
+
+
+    /**
+     *  上传图片
+     */
+    private fun uploadImage(uploadToken: String) {
+        viewModel.showLoading.value = "loading"
+        uploadManager.put(mHeaderImageUrlCompress,null,uploadToken,
+            { key, info, response ->
+                viewModel.hideLoading.value = "hide"
+                if (info.isOK) {
+                    ToastUtils.show("上传成功")
+                    Log.d(logTag, "上传成功")
+                    Log.d(logTag, response.toString())
+                    setHeaderImage(
+//                        QiNiuUtils.instance.downloadUrl(BaseConstant.QINIU_ADDRESS + response?.get("hash"))
+                        BaseConstant.QINIU_ADDRESS + response?.get("hash")
+                    )
+                } else {
+                    ToastUtils.show("上传失败")
+                    Log.e(logTag, info.error)
+                }
+            },null)
+    }
+
+    /**
+     *  设置头像图片
+     */
+    private fun setHeaderImage(path: String) {
+        if (TextUtils.isEmpty(path)) {
+            return
+        }
+        GlideUtils.loadUrlImage(this,path,binding.mUserIconIv)
     }
 }

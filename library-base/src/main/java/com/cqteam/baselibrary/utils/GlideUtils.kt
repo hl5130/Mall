@@ -2,6 +2,7 @@ package com.cqteam.baselibrary.utils
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -25,6 +26,7 @@ object GlideUtils {
         当fragment或者activity失去焦点或者destroyed的时候，Glide会自动停止加载相关资源，确保资源不会被浪费
      */
     fun loadUrlImage(context: Context, url: String, imageView: ImageView){
+        Log.d("GlideUtils",url)
         Glide.with(context).load(url).placeholder(R.drawable.icon_back).error(R.drawable.icon_back).centerCrop().into(
                 object : CustomTarget<Drawable>() {
                     override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
