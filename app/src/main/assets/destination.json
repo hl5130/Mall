@@ -1,0 +1,9 @@
+{
+  "main/tabs/home": {
+    "asStarter": true,
+    "pageUrl": "main/tabs/home",
+    "clazName": "com.cqteam.mall.ui.fragment.HomeFragment",
+    "id": 1432854665,
+    "destType": "fragment"
+  }
+}

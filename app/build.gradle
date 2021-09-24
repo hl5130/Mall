@@ -52,4 +52,9 @@ dependencies {
     if (isUserModule.toBoolean()) {
         implementation project(path: ':business-user')
     }
+    
+    // nav
+    implementation project(path: ':nav-annotation')
+    kapt project(path: ':nav-compiler')
+
 }

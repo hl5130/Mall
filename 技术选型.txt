@@ -2,6 +2,8 @@
 
 架构：MVVM，Jetpack-ViewModel，Jetpack-LiveData，Jetpack-Lifecycle，Kotlin-Coroutine，Jetpack-Hilt
 
+自定义Fragment导航组件：使用注解的方式
+
 权限：permissions-dispatcher
 
 网络框架：OkHttp、Retrofit
@@ -16,3 +18,4 @@
 控件：
     弹窗：alert-view
     底部导航栏：bottom-navigation
+    轮播广告：youth5201314:banner

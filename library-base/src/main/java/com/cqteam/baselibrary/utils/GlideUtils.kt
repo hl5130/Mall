@@ -27,7 +27,7 @@ object GlideUtils {
      */
     fun loadUrlImage(context: Context, url: String, imageView: ImageView){
         Log.d("GlideUtils",url)
-        Glide.with(context).load(url).placeholder(R.drawable.icon_back).error(R.drawable.icon_back).centerCrop().into(
+        Glide.with(context).load(url).placeholder(R.drawable.placeholder).error(R.drawable.error).fallback(R.drawable.fallback).centerCrop().into(
                 object : CustomTarget<Drawable>() {
                     override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
                         imageView.setImageDrawable(resource)
