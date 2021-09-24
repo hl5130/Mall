@@ -1,0 +1,18 @@
+开发语言： Kotlin
+
+架构：MVVM，Jetpack-ViewModel，Jetpack-LiveData，Jetpack-Lifecycle，Kotlin-Coroutine，Jetpack-Hilt
+
+权限：permissions-dispatcher
+
+网络框架：OkHttp、Retrofit
+
+图片框架：
+    图片加载框架：Glide
+    图片选择框架：picture-selector
+    图片压缩框架：compressor
+    圆形图片：circle-imageview
+    图片云服务器：qiniu
+
+控件：
+    弹窗：alert-view
+    底部导航栏：bottom-navigation

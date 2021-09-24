@@ -83,16 +83,17 @@ dependencies {
     api "com.bigkoo:alertview:${alert_view_version}"
     // PicturesSelector
     api "io.github.lucksiege:pictureselector:$pictures_selector_version"
-
     // 权限拦截器
     api "com.github.permissions-dispatcher:permissionsdispatcher:${permission_dispatcher_version}"
     kapt "com.github.permissions-dispatcher:permissionsdispatcher-processor:${permission_dispatcher_version}"
-
     // 七牛云
     api ("com.qiniu:qiniu-android-sdk:$qiniu_version"){
         exclude (group: 'com.squareup.okhttp3', module: 'okhttp')
     }
-
     // 图片压缩框架
     api 'id.zelory:compressor:3.0.1'
+    // 底部导航栏
+    api 'com.ashokvarma.android:bottom-navigation-bar:2.2.0'
+
+
 }
