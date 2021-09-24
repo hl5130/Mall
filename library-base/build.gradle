@@ -94,6 +94,8 @@ dependencies {
     api 'id.zelory:compressor:3.0.1'
     // 底部导航栏
     api 'com.ashokvarma.android:bottom-navigation-bar:2.2.0'
+    // banner
+    api 'io.github.youth5201314:banner:2.2.2'
 
 
 }
