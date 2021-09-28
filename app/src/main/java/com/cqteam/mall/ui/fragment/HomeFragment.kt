@@ -45,6 +45,14 @@ class HomeFragment: BaseFragment<HomeViewModel, FragmentHomeBinding>(){
         binding.mHomeBanner.setAdapter(ImageAdapter(datas))
             .addBannerLifecycleObserver(this)
             .indicator = CircleIndicator(requireContext())
+
+        initNewsView()
+    }
+
+    private fun initNewsView() {
+        binding.mNewsFlipperView.setData(
+            arrayOf("这是一个新的公告","这个世界上没有奥特曼","大师兄，师傅被妖怪抓走了")
+        )
     }
 
     override fun initData(view: View, savedInstanceState: Bundle?) {
