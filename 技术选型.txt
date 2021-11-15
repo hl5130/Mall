@@ -1,6 +1,12 @@
 开发语言： Kotlin
 
-架构：MVVM，Jetpack-ViewModel，Jetpack-LiveData，Jetpack-Lifecycle，Kotlin-Coroutine，Jetpack-Hilt
+架构：MVVM，
+Jetpack-ViewModel，
+Jetpack-LiveData，
+Jetpack-Lifecycle，
+Jetpack-Hilt,
+Jetpack-DataStore,
+Kotlin-Coroutine，
 
 自定义Fragment导航组件：使用注解的方式
 
